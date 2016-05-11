@@ -13,16 +13,20 @@ Command::Command(char ** arr[]) {
 bool Command::execute() {
     bool value;
     pid_t pid = fork();
-    if (pid < 0) {
-        perror(
-    else if (pid = 0) {
-        //child performs execution of command
-        execvp(args[0], args);
-    }
-    else {
-        //this is the parent process
-        
+    if (pid == 0) {
+        //child process
+        if (execvp(args[0], args) == -1) {
+            perror("exec");
+        }
+    }   
+    else if (pid > 0) {
+        //parent process
+        if (wait(0) == -1) {
+            perror("wait");
+        }
     }    
+    return value;
+}
 
 Exit::
 
