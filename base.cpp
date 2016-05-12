@@ -7,10 +7,13 @@ using namespace std;
 #include "base.h"
 
 Base::Base() {};
-
+Base::~Base() {};
 
 Command::Command(char ** arr[]) {
     args = *arr[];        //no clue if this is how to do it
+}
+Command::~Command() {
+    delete[] args;
 }
 bool Command::execute() {
     pid_t child_pid;
@@ -45,38 +48,44 @@ bool Command::execute() {
     }    
 }
 
-Exit::
+Exit::Exit() {
 
-Connector::Connector() : Base() {};
-
-Connector::Connector(Base* left, Base* right) {
-    this->lhs = left;
-    this->rhs = right;
+}
+Exit::~Exit() {
+    
 }
 
+Connector::Connector() : Base() {};
+Connector::~Connector() {};
+}
 Base* Connector::get_lhs() {
     return lhs;
 }
 Base* Connector::get_rhs() {
     return rhs;
 }
-void
+void Connector::set_lhs(Base* left) {
+    this->lhs = left;
+}
+void Connector::set_rhs(Base* right) {
+    this->rhs = right;
+}
 
 Semicolon::Semicolon() : Connector() {};
-
-Semicolon::Semicolon(Base* left, Base* right)
-    : Connector(left, right) {};
-
+Semicolon::~Semicolon() {
+    delete rhs; 
+    delete lhs;
+}
 bool Semicolon::execute() {
     get_lhs()->execute();
     return get_rhs()->execute();
 }
 
 Ampersand::Ampersand() : Connector() {};
-
-Ampersand::Ampersand(Base* left, Base* right)
-    : Connector(left, right) {};
-
+Ampersand::~Ampersand() {
+    delete rhs;
+    delete lhs;
+}
 bool Ampersand::execute() {
     if (get_lhs()->execute() == true) {
         return get_rhs()->execute();
@@ -87,10 +96,10 @@ bool Ampersand::execute() {
 }
 
 Verticalbars::Verticalbars() : Connector() {};
-
-Verticalbars::Verticalbars(Base* left, Base* right)
-    : Connector(left, right) {};
-
+Verticalbars::~Verticalbars() {
+    delete rhs;
+    delete lhs;
+}
 bool Verticalbars::execute() {
      if (get_lhs()->execute() == true) {
         return true;

@@ -8,9 +8,9 @@ class Base {
 
     public:
         Base();
+        ~Base();
         virtual bool execute() = 0;
-
-}
+};
 
 class Command : public Base {
     private:
@@ -18,14 +18,16 @@ class Command : public Base {
 
     public:
         Command(char ** arr[]);
+        ~Command();
         virtual bool execute();
-}
+};
 
 class Exit : public Command {
     public:
-        Exit(char ** arr[]); 
+        Exit(); 
+        ~Exit();
         virtual bool execute();
-}
+};
 
 class Connector : public Base {
     private:
@@ -33,31 +35,34 @@ class Connector : public Base {
         Base* rhs;
     public:
         Connector();
-        Connector(Base* left, Base* right);
+        ~Connector();
         virtual Base* get_lhs(); 
         virtual Base* get_rhs(); 
-        virtual Base* set_lhs(); 
-        virtual Base* set_rhs(); 
+        virtual Base* set_lhs(Base* left); 
+        virtual Base* set_rhs(Base* right); 
         virtual bool execute() = 0;
-}
+};
 
 class Semicolon : public Connector {
     public:
-        Semicolon(Base* left, Base* right);
+        Semicolon();
+        ~Semicolon();
         virtual bool execute();
-}
+};
 
 class Ampersand : public Connector {
     public:
-        Ampersand(Base* left, Base* right);
+        Ampersand();
+        ~Ampersand();
         virtual bool execute();
-}
+};
 
 class Verticalbars : public Connector {
     public:
-        Verticalbars(Base* left, Base* right);
+        Verticalbars();
+        ~Verticalbars();
         virtual bool execute();
-}
+};
 
 
 #endif
