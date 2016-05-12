@@ -32,11 +32,12 @@ class Connector : public Base {
         Base* lhs;
         Base* rhs;
     public:
+        Connector();
         Connector(Base* left, Base* right);
         virtual Base* get_lhs(); 
-        virtual Base* get_lhs(); 
-        virtual Base* get_lhs(); 
-        virtual Base* get_lhs(); 
+        virtual Base* get_rhs(); 
+        virtual Base* set_lhs(); 
+        virtual Base* set_rhs(); 
         virtual bool execute() = 0;
 }
 

@@ -30,8 +30,12 @@ bool Command::execute() {
             //parent process
             waitpid(child_pid, &status, 0);
             
-            if (WEXITSTATUS(status)   
+            if ( WEXITSTATUS(status) >= 0 ) {
                 return true;
+            }
+            else {
+                return false;
+            }
         }
     }   
     else {
@@ -43,6 +47,7 @@ bool Command::execute() {
 
 Exit::
 
+Connector::Connector() : Base() {};
 
 Connector::Connector(Base* left, Base* right) {
     this->lhs = left;
@@ -55,6 +60,9 @@ Base* Connector::get_lhs() {
 Base* Connector::get_rhs() {
     return rhs;
 }
+void
+
+Semicolon::Semicolon() : Connector() {};
 
 Semicolon::Semicolon(Base* left, Base* right)
     : Connector(left, right) {};
@@ -63,6 +71,8 @@ bool Semicolon::execute() {
     get_lhs()->execute();
     return get_rhs()->execute();
 }
+
+Ampersand::Ampersand() : Connector() {};
 
 Ampersand::Ampersand(Base* left, Base* right)
     : Connector(left, right) {};
@@ -75,6 +85,9 @@ bool Ampersand::execute() {
         return false;
     }
 }
+
+Verticalbars::Verticalbars() : Connector() {};
+
 Verticalbars::Verticalbars(Base* left, Base* right)
     : Connector(left, right) {};
 
