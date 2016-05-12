@@ -1,4 +1,6 @@
 #include <iostream>
+#include <unistd.h>
+#include <sys/wait.h>
 
 using namespace std;
 
@@ -8,24 +10,35 @@ Base::Base() {};
 
 
 Command::Command(char ** arr[]) {
-    args[] = *arr[];        //no clue if this is how to do it
+    args = *arr[];        //no clue if this is how to do it
 }
 bool Command::execute() {
-    bool value;
-    pid_t pid = fork();
-    if (pid == 0) {
-        //child process
-        if (execvp(args[0], args) == -1) {
-            perror("exec");
+    pid_t child_pid;
+    int status;
+
+    child_pid = fork();
+
+    if (pid >= 0) {
+        //fork succeeded
+        if (child_pid == 0) {
+            //child process
+            execvp(args[0], args);
+            printf("Unknown command!\n");
+            exit(0);    
+        }
+        else {
+            //parent process
+            waitpid(child_pid, &status, 0);
+            
+            if (WEXITSTATUS(status)   
+                return true;
         }
     }   
-    else if (pid > 0) {
-        //parent process
-        if (wait(0) == -1) {
-            perror("wait");
-        }
+    else {
+        //failure
+        perror("fork");
+        return false;
     }    
-    return value;
 }
 
 Exit::
