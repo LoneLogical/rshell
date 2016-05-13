@@ -1,0 +1,15 @@
+$ cd rshell
+$ ./a.out
+
+ls -a || good morning; ps
+mkdir TEST_D && ls -a
+history; ls
+echo "left hand test" || echo left failed && ls; history && ps
+echo clear the term; clear
+echo || ls -n && echo line 9 test || mkdir LINE9
+ps && ls -m
+cat asdfghjkl || echo line 11 lhs does not exist
+ls -q; ps
+mkdir || echo || ls
+ls -R && touch line14.txt
+ls -a && ls || ls
