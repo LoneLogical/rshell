@@ -1,0 +1,1 @@
+./rshell < echo single command
