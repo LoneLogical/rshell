@@ -3,16 +3,32 @@
 #include <vector>
 #include "base.h"
 #include "base.cpp"
+#include <unistd.h>
 using namespace std;
 
+void command_line(string);
 
 int main ()
-{
-    string cmd;
+{	
+	while(1) {
+		char* a = getlogin();
+		cout << a << "@";
+		int b = gethostname(a, 100);
+		cout << a;
+		b++;
+		cout << "$ ";
+		
+		string cmd;
+	    getline(cin, cmd);
+
+		command_line(cmd);
+	}
+    return 0;
+}
+
+void command_line(string cmd) {
     char* str1;
     char* str2;
-    cout << "$ ";
-    getline(cin, cmd);
     str1 = new char[cmd.size() + 1];
     strcpy(str1, cmd.c_str());
     /*
@@ -105,7 +121,14 @@ int main ()
            strcpy(cmdarr[a], args.at(a));
         }
         cout << "this works1" << endl;
-        command = new Command(cmdarr);
+		
+		string tmp(cmdarr[0]);
+        if(tmp == "exit") {
+			command = new Exit(cmdarr);
+        }
+        else {
+			command = new Command(cmdarr);
+		}
         // also...if statement to test if array[0] == exit
         // command = new Command(array);
 
@@ -167,6 +190,4 @@ int main ()
     }
     cout << "out here" << endl;
     user->execute();
-    return 0;
 }
-

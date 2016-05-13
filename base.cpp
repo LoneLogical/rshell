@@ -8,7 +8,7 @@ using namespace std;
 
 #include "base.h"
 
-Base::Base() {};
+Base::Base() {}
 
 Command::Command(char** arr) {
     //int size = arr.size();
@@ -21,10 +21,16 @@ Command::Command(char** arr) {
 bool Command::execute() {
     pid_t child_pid;
     int status;
+    bool temp = true;
 
     child_pid = fork();
 
-    if (child_pid >= 0) {
+    if(child_pid == -1) {
+    	perror("fork");
+    	temp = false;
+    }
+
+    else if (child_pid >= 0) {
         //fork succeeded
         if (child_pid == 0) {
             //child process
@@ -40,18 +46,14 @@ bool Command::execute() {
             }
             
             if ( WEXITSTATUS(status) == 0 ) {
-                return true;
+            	temp = true;
             }
             else {
-                return false;
+                temp = false;;
             }
         }
     }   
-    else {
-        //failure
-        perror("fork");
-        return false;
-    }    
+    return temp;
 }
 
 Exit::Exit(char** arr) : Command(arr) {}
@@ -59,7 +61,7 @@ bool Exit::execute() {
    exit(0);
 } 
 
-Connector::Connector() : Base() {};
+Connector::Connector() : Base() {}
 Base* Connector::get_lhs() {
     return lhs;
 }
@@ -73,13 +75,13 @@ void Connector::set_rhs(Base* right) {
     this->rhs = right;
 }
 
-Semicolon::Semicolon() : Connector() {};
+Semicolon::Semicolon() : Connector() {}
 bool Semicolon::execute() {
     get_lhs()->execute();
     return get_rhs()->execute();
 }
 
-Ampersand::Ampersand() : Connector() {};
+Ampersand::Ampersand() : Connector() {}
 bool Ampersand::execute() {
     if (get_lhs()->execute() == true) {
         return get_rhs()->execute();
@@ -89,7 +91,7 @@ bool Ampersand::execute() {
     }
 }
 
-Verticalbars::Verticalbars() : Connector() {};
+Verticalbars::Verticalbars() : Connector() {}
 bool Verticalbars::execute() {
      if (get_lhs()->execute() == true) {
         return true;
