@@ -1,19 +1,22 @@
 #include <iostream>
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 using namespace std;
 
 #include "base.h"
 
 Base::Base() {};
-Base::~Base() {};
 
-Command::Command(char ** arr[]) {
-    args = *arr[];        //no clue if this is how to do it
-}
-Command::~Command() {
-    delete[] args;
+Command::Command(char** arr) {
+    //int size = arr.size();
+    //char* arr1[] = new char* array[size];
+    //for (unsigned int i = 0; i < size; ++i) {
+    //    arr1[i] = arr.at(i);
+    //}
+    this->args = arr;
 }
 bool Command::execute() {
     pid_t child_pid;
@@ -21,19 +24,22 @@ bool Command::execute() {
 
     child_pid = fork();
 
-    if (pid >= 0) {
+    if (child_pid >= 0) {
         //fork succeeded
         if (child_pid == 0) {
             //child process
-            execvp(args[0], args);
-            printf("Unknown command!\n");
-            exit(0);    
+            if(execvp(args[0], args) == -1) {
+                perror("execvp");
+                exit(1);
+            }    
         }
         else {
             //parent process
-            waitpid(child_pid, &status, 0);
+            if(waitpid(child_pid, &status, 0) == -1) {
+                perror("wait");
+            }
             
-            if ( WEXITSTATUS(status) >= 0 ) {
+            if ( WEXITSTATUS(status) == 0 ) {
                 return true;
             }
             else {
@@ -48,16 +54,12 @@ bool Command::execute() {
     }    
 }
 
-Exit::Exit() {
-
-}
-Exit::~Exit() {
-    
-}
+Exit::Exit(char** arr) : Command(arr) {}
+bool Exit::execute() {
+   exit(0);
+} 
 
 Connector::Connector() : Base() {};
-Connector::~Connector() {};
-}
 Base* Connector::get_lhs() {
     return lhs;
 }
@@ -72,20 +74,12 @@ void Connector::set_rhs(Base* right) {
 }
 
 Semicolon::Semicolon() : Connector() {};
-Semicolon::~Semicolon() {
-    delete rhs; 
-    delete lhs;
-}
 bool Semicolon::execute() {
     get_lhs()->execute();
     return get_rhs()->execute();
 }
 
 Ampersand::Ampersand() : Connector() {};
-Ampersand::~Ampersand() {
-    delete rhs;
-    delete lhs;
-}
 bool Ampersand::execute() {
     if (get_lhs()->execute() == true) {
         return get_rhs()->execute();
@@ -96,10 +90,6 @@ bool Ampersand::execute() {
 }
 
 Verticalbars::Verticalbars() : Connector() {};
-Verticalbars::~Verticalbars() {
-    delete rhs;
-    delete lhs;
-}
 bool Verticalbars::execute() {
      if (get_lhs()->execute() == true) {
         return true;
