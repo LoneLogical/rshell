@@ -1,5 +1,2 @@
-//Assignment 02 -- Rshell
-
-//README.md
-
-
+# rshell
+CS100 Assignment 2
