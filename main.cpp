@@ -48,34 +48,44 @@ void command_line(string cmd) {
     del = strpbrk (str1, keys); //finds first delimiter              
     while (del != NULL) // checkes to make sure don't go out of bounds
     {
+        cout << "entered while loop1" << endl;
         conns.push_back(*del); //pushes last delimiter onto vector
         del = strpbrk (del+1,keys); //finds next delimiter
     }
-                    
+    cout << "did not enter while loop1" << endl;
     for (unsigned int i = 0; i < conns.size(); ++i)
     {
+        cout << "entered for loop2" << endl;
         cout << conns.at(i) << ' '; //prints delimiters found
     }
     cout << endl;
-
+    cout << "did not enter for loop2" << endl;
     
     Connector* prev = NULL;
     Connector* curr = NULL;
     Command* command = NULL;
-    Connector* user = NULL;
-
+    Base* user = NULL;
+    
+    char* token = NULL;
     unsigned int j = 0;
-    char d = conns.at(j);
-    del = new char[2];
-    del[0] = d; 
-    del[1] = '\0';
-    // takes in the first delimiter in command line
-    // used to create tokens of commands + flags
-    char* saved ; // used with strtok_r because the inner while loop uses 
+    char d;
+    char* saved;  // used with strtok_r because the inner while loop uses 
                  // strtok also, so it messes up outer while loop's 
                  // strtok pointers, thus we use strtok_r on outer
 
-    char* token = strtok_r(str2, del, &saved); // first command
+    cout << "conns size: " << conns.size() << endl;
+    if (conns.size() > 0) {
+        d = conns.at(j);
+        del = new char[2];
+        del[0] = d; 
+        del[1] = '\0';
+        // takes in the first delimiter in command line
+        // used to create tokens of commands + flags
+               token = strtok_r(str2, del, &saved); // first command
+    }
+    else {
+        token = str2;   
+    }
 
     while ((token != NULL) && (j <= conns.size())) //makes sure we don't go out of bounds
     {
@@ -89,18 +99,22 @@ void command_line(string cmd) {
             small = strtok(NULL, " ");
         }
         cout << endl;
-
+        cout << "good so far 1" << endl;
         // for loop to convert vector<char*> into char* array[]
         // then create a command object by passing in array
         char** cmdarr;
         cmdarr = new char*[args.size()];
 
-        for (int a = 0; a < args.size(); ++a) {
+        for (unsigned int a = 0; a < args.size(); ++a) {
            string temp(args.at(a));
            cmdarr[a] = new char[temp.size()];
            strcpy(cmdarr[a], args.at(a));
+           cout << "cmdarr[a]: " << cmdarr[a] << endl;
         }
-		
+
+        //char tzero[] = "\0";
+        //cmdarr[args.size()] = tzero;
+	    	
 		string tmp(cmdarr[0]);
         if(tmp == "exit") {
 			command = new Exit(cmdarr);
@@ -116,7 +130,11 @@ void command_line(string cmd) {
         //char amper[] = "&";
         //char verti[] = "|";
         
-        if (j == conns.size()) {
+        if (conns.size() == 0) {
+            user = command;
+            j = j + 1;
+        }
+        else if (j == conns.size()) {
             prev->set_rhs(command);
             user = prev;
             j = j + 1;
@@ -166,4 +184,6 @@ void command_line(string cmd) {
     }
     cout << "out here" << endl;
     user->execute();
+
+    return;
 }

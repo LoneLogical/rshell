@@ -19,37 +19,38 @@ Command::Command(char** arr) {
     this->args = arr;
 }
 bool Command::execute() {
-    pid_t child_pid;
-    int status;
+    pid_t pid;
     bool temp = true;
 
-    child_pid = fork();
+    pid = fork();
 
-    if(child_pid == -1) {
+    if(pid == -1) {
     	perror("fork");
     	temp = false;
     }
 
-    else if (child_pid >= 0) {
+    else if (pid >= 0) {
         //fork succeeded
-        if (child_pid == 0) {
+        if (pid == 0) {
             //child process
             if(execvp(args[0], args) == -1) {
                 perror("execvp");
+                temp = false;
                 exit(1);
             }    
         }
         else {
             //parent process
-            if(waitpid(child_pid, &status, 0) == -1) {
+            int status;
+            if(waitpid(pid, &status, 0) == -1) {
                 perror("wait");
             }
             
-            if ( WEXITSTATUS(status) == 0 ) {
-            	temp = true;
+            if ( WEXITSTATUS(status) == 1 ) {
+            	temp = false;
             }
             else {
-                temp = false;;
+                temp = true;
             }
         }
     }   
