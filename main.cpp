@@ -27,32 +27,18 @@ int main ()
 }
 
 void command_line(string cmd) {
+    
     char* str1;
     char* str2;
+
     str1 = new char[cmd.size() + 1];
     strcpy(str1, cmd.c_str());
-    /*
-    for (int index = 0; index < cmd.size(); ++index) {
-        str1[index] = cmd.at(index);
-    }
-    str1[cmd.size()] = '\0';
-    */
     str1 = strtok(str1, "#");
     
     str2 = new char[cmd.size()];
     strcpy(str2, cmd.c_str());
-    /*
-    for (int index = 0; index < cmd.size(); ++index) {
-        str2[index] = cmd.at(index);
-    }
-    str2[cmd.size()] = '\0';
-    */
     str2 = strtok(str2, "#");
     
-    
-    //char str1[] = "ls -a; echo hello && ls -l || exit";
-    //char str2[] = "ls -a; echo hello && ls -l || exit";
-
     char keys[] = ";&|"; 
     vector<char> conns; // holds the delimiters in order in which they were found
     char* del;
@@ -85,21 +71,15 @@ void command_line(string cmd) {
     del[1] = '\0';
     // takes in the first delimiter in command line
     // used to create tokens of commands + flags
-    string temp2(del);
-    cout << "temp2: " << temp2 << endl;
     char* saved ; // used with strtok_r because the inner while loop uses 
                  // strtok also, so it messes up outer while loop's 
                  // strtok pointers, thus we use strtok_r on outer
 
     char* token = strtok_r(str2, del, &saved); // first command
-    string tempt1(token);
-    cout << "tempt1: " << tempt1 << endl;
 
     while ((token != NULL) && (j <= conns.size())) //makes sure we don't go out of bounds
     {
-        cout << "made it through" << endl;
         cout << "Token #" << j << ": " << token << endl;
-        //char *token2 = token;  // THIS MAY CAUSES PROBLEMS
         vector<char*> args;
         char* small = strtok(token, " ");
         while (small != NULL)
@@ -120,7 +100,6 @@ void command_line(string cmd) {
            cmdarr[a] = new char[temp.size()];
            strcpy(cmdarr[a], args.at(a));
         }
-        cout << "this works1" << endl;
 		
 		string tmp(cmdarr[0]);
         if(tmp == "exit") {
@@ -145,7 +124,6 @@ void command_line(string cmd) {
         else {
 
             string temp1(del);
-            cout << "temp1: " << temp1 << endl;
             if (temp1 == ";") {
                 curr = new Semicolon();
                 cout << "entered semi" << endl;
@@ -153,15 +131,16 @@ void command_line(string cmd) {
             else if (temp1 == "&") {
                 curr = new Ampersand();
                 cout << "entered amper" << endl;
+                j = j + 1; //skips the next ampersand waiting to be added
             }
             else if (temp1 == "|") {
                 curr = new Verticalbars();
                 cout << "entered verti" << endl;
+                j = j + 1; //skipd the next verticalbars waiting to be added
             }
             else {
                 cout << "still didn't enter" << endl;
             }
-            cout << "this works2" << endl;
             // places command and connector objects in correct place
             if (prev == NULL) {
                 curr->set_lhs(command);
@@ -182,10 +161,7 @@ void command_line(string cmd) {
                 del[1] = '\0';
             }
             token = strtok_r(saved, del, &saved);
-
-            string tempt2(token);
-            cout << "tempt2: " << tempt2 << endl;
-    
+ 
         }
     }
     cout << "out here" << endl;
