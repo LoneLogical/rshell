@@ -1,6 +1,3 @@
-$ cd rshell
-$ ./a.out
-
 ls -a || good morning; ps
 mkdir TEST_D && ls -a
 history; ls
