@@ -43,23 +43,19 @@ void command_line(string cmd) {
     vector<char> conns; // holds the delimiters in order in which they were found
     char* del;
 
-    cout << "Connectors in " << str1 << ": ";
     
     del = strpbrk (str1, keys); //finds first delimiter              
     while (del != NULL) // checkes to make sure don't go out of bounds
     {
-        cout << "entered while loop1" << endl;
         conns.push_back(*del); //pushes last delimiter onto vector
         del = strpbrk (del+1,keys); //finds next delimiter
     }
-    cout << "did not enter while loop1" << endl;
+    /*
     for (unsigned int i = 0; i < conns.size(); ++i)
     {
-        cout << "entered for loop2" << endl;
         cout << conns.at(i) << ' '; //prints delimiters found
     }
-    cout << endl;
-    cout << "did not enter for loop2" << endl;
+    */
     
     Connector* prev = NULL;
     Connector* curr = NULL;
@@ -73,7 +69,6 @@ void command_line(string cmd) {
                  // strtok also, so it messes up outer while loop's 
                  // strtok pointers, thus we use strtok_r on outer
 
-    cout << "conns size: " << conns.size() << endl;
     if (conns.size() > 0) {
         d = conns.at(j);
         del = new char[2];
@@ -89,31 +84,27 @@ void command_line(string cmd) {
 
     while ((token != NULL) && (j <= conns.size())) //makes sure we don't go out of bounds
     {
-        cout << "Token #" << j << ": " << token << endl;
         vector<char*> args;
         char* small = strtok(token, " ");
         while (small != NULL)
         {
-            cout << '_' << small << '_' << ' '; 
             args.push_back(small);
             small = strtok(NULL, " ");
         }
         cout << endl;
-        cout << "good so far 1" << endl;
         // for loop to convert vector<char*> into char* array[]
         // then create a command object by passing in array
         char** cmdarr;
-        cmdarr = new char*[args.size()];
+        cmdarr = new char*[args.size() + 1];
 
         for (unsigned int a = 0; a < args.size(); ++a) {
            string temp(args.at(a));
            cmdarr[a] = new char[temp.size()];
            strcpy(cmdarr[a], args.at(a));
-           cout << "cmdarr[a]: " << cmdarr[a] << endl;
         }
 
         //char tzero[] = "\0";
-        //cmdarr[args.size()] = tzero;
+        cmdarr[args.size()] = NULL;
 	    	
 		string tmp(cmdarr[0]);
         if(tmp == "exit") {
@@ -144,20 +135,16 @@ void command_line(string cmd) {
             string temp1(del);
             if (temp1 == ";") {
                 curr = new Semicolon();
-                cout << "entered semi" << endl;
             }
             else if (temp1 == "&") {
                 curr = new Ampersand();
-                cout << "entered amper" << endl;
                 j = j + 1; //skips the next ampersand waiting to be added
             }
             else if (temp1 == "|") {
                 curr = new Verticalbars();
-                cout << "entered verti" << endl;
                 j = j + 1; //skipd the next verticalbars waiting to be added
             }
             else {
-                cout << "still didn't enter" << endl;
             }
             // places command and connector objects in correct place
             if (prev == NULL) {
@@ -167,7 +154,6 @@ void command_line(string cmd) {
                 prev->set_rhs(command);
                 curr->set_lhs(prev);
             }
-            cout << "this works3" << endl; 
             prev = curr;
         
             j = j + 1;
@@ -182,7 +168,6 @@ void command_line(string cmd) {
  
         }
     }
-    cout << "out here" << endl;
     user->execute();
 
     return;
