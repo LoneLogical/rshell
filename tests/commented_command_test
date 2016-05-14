@@ -1,6 +1,3 @@
-$ cd rshell
-$ ./a.out
-
 echo good #morning
 ls || echo good morning #this is a test comment
 echo test # && ls
