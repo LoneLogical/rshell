@@ -1,0 +1,12 @@
+ps
+ls
+ls -a
+ls -l
+ls -o
+touch file.txt
+rm file.txt
+mv file.txt file.cpp
+echo hello
+cheo hola
+mkdir giant
+exit
