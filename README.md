@@ -23,6 +23,6 @@ To write a basic command shell, my partner and I intend to use the composite pat
 
 
 #Authors
-Destin Raymundo 
+Destin Raymundo: [https://github.com/draym001]
 
-Andrew Whitaker 
+Andrew Whitaker: [https://github.com/LoneLogical]
