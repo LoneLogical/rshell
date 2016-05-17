@@ -10,3 +10,4 @@ ls -q; ps
 mkdir || echo || ls
 ls -R && touch line14.txt
 ls -a && ls || ls
+exit
