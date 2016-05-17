@@ -70,7 +70,6 @@ void command_line(string cmd) {
 
     char* token = NULL;
     char d;
-    char* trash;
     del = new char[2];
     char* saved;  // used with strtok_r because the inner while loop uses 
     // strtok also, so it messes up outer while loop's 
@@ -78,7 +77,6 @@ void command_line(string cmd) {
     vector<char*> args;
     char* small;
     char** cmdarr;
-    char* tempzero;
 
     if (conns.size() == 0) {
         small = strtok(str2, " ");
