@@ -10,3 +10,4 @@ touch mockup.txt #this time with file name
 cat mockup.txt #cat tries
 history -q # testing with space after hash
 echo mkdir testDirectory # echo ERROR
+exit
