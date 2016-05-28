@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -55,6 +57,76 @@ bool Command::execute() {
         }
     }   
     return temp;
+}
+
+Test::Test(char** arr) : Command(arr) {
+	this->args = arr;
+}
+
+bool Test::execute() {
+	struct stat sb;
+
+	char flag;
+	int pathIndex = 1; // assumes path is the second index
+
+	if(!strcmp(args[0], "-e")) {
+		flag = 'e';
+	}
+	else if(!strcmp(args[0], "-f")) {
+		flag = 'f';
+	}
+	else if(!strcmp(args[0], "-d")) {
+		flag = 'd';
+	}
+	else { // default: if no flag exists, it is -e
+		flag = 'e';
+		pathIndex = 0; // assumes the path is the first index since there is no flag
+	}
+
+	bool fdExists = (stat(args[pathIndex], &sb) == 0);
+
+	if(flag == 'f') {
+		if(!fdExists) {
+			cout << "(False)" << endl;
+			return fdExists;
+		}
+		else {
+			if(S_ISREG(sb.st_mode)) {
+				cout << "(True)" << endl;
+				return fdExists;
+			}
+			else {
+				cout << "(False)" << endl;
+				return false;
+			}
+		}
+	}
+	else if(flag == 'd') {
+		if(!fdExists) {
+			cout << "(False)" << endl;
+			return fdExists;
+		}
+		else {
+			if(S_ISDIR(sb.st_mode)) {
+				cout << "(True)" << endl;
+				return fdExists;
+			}
+			else {
+				cout << "(False)" << endl;
+				return false;
+			}
+		}
+	}
+	else { // case for -e flag
+		if(fdExists) {
+			cout << "(True)" << endl;
+			return fdExists;
+		}
+		else {
+			cout << "(False)" << endl;
+			return fdExists;
+		}
+	}
 }
 
 Exit::Exit(char** arr) : Command(arr) {}
