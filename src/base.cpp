@@ -46,7 +46,7 @@ bool Command::execute() {
                 perror("wait");
             }
             
-            if ( WEXITSTATUS(status) == 1 ) {
+            if ( WEXITSTATUS(status) != 0 ) {
             	temp = false;
             }
             else {
@@ -56,6 +56,11 @@ bool Command::execute() {
     }   
     return temp;
 }
+bool Command::check_type() {  //checks base ptr to see if it's a connector
+    return false;
+}
+void Command::set_lhs(Base* left) {} //do nothing functions
+void Command::set_rhs(Base* right) {}
 
 Exit::Exit(char** arr) : Command(arr) {}
 bool Exit::execute() {
@@ -74,6 +79,9 @@ void Connector::set_lhs(Base* left) {
 }
 void Connector::set_rhs(Base* right) {
     this->rhs = right;
+}
+bool Connector::check_type() { //checks base ptr to see if it's a connector
+    return true;
 }
 
 Semicolon::Semicolon() : Connector() {}
