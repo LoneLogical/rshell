@@ -13,7 +13,7 @@ class Base {
 };
 
 class Command : public Base {
-    private:
+    protected:
         char** args;
     public:
         Command(char** arr);
@@ -27,6 +27,12 @@ class Exit : public Command {
     public:
         Exit(char** arr); 
         virtual bool execute();
+};
+
+class Test : public Command {
+	private:
+		Test(char** arr);
+		virtual bool execute();
 };
 
 class Connector : public Base {
