@@ -152,16 +152,19 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
                 del[0] = d;
                 del[1] = '\0';
 
-                if (d == ';') {
+                if ( (d == ';') || (d == ')') ) {
                     c = cmdstr[0];
-                    if (c == ';') {
+                    if ( (c == ';') || (c == ';') ) {
                         cmdstr = cmdstr + 1;
                     }
+                    cout << "limbo 3" << endl;
+                    char stringlimbo[] = "limbostr";
+                    token = stringlimbo;
                 }
                 else {
                     token = strtok_r(cmdstr, del, &cmdstr);
                 }
-                cout << "token = " << token << endl;
+                cout << "tokenAlpha = " << token << endl;
                 cout << "cmdstr = " << cmdstr << endl;
                 //token = NULL;
 
@@ -172,14 +175,16 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
                     cout << "does it return from here???" << endl;
                     return prev;
                 }
+                cout << "limbo 2" << endl;
             }
             else {
+                cout << "limbo 1" << endl;
                 return prev;
             }
         }
         else {
             token = strtok_r(cmdstr, del, &cmdstr);
-            cout << "token = " << token << endl;
+            cout << "tokenBravo = " << token << endl;
             cout << "cmdstr = " << cmdstr << endl;
            
             //make command object
@@ -215,10 +220,11 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
         else if (deltemp == ")") {
             cout << "hit ) => returning from recursion" << endl;
             if (prev == NULL) {
-                cout << "returned from here" << endl;
+                cout << "returned from here1" << endl;
                 return child;
             }
             else {
+                cout << "returned from here2" << endl;
                 prev->set_rhs(child);
                 return prev;
             }
@@ -230,6 +236,7 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
 
         // places command and connector objects in correct place
         if (prev == NULL) {
+            cout << "set lhs 1" << endl;
             curr->set_lhs(child);
         }
         else {
