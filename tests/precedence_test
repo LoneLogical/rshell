@@ -1,0 +1,21 @@
+echo A &&  echo B || echo C && echo D
+(echo A &&  echo B) || (echo C && echo D)
+echo A || (echo B && echo C) && echo D
+echo A || (echo B && echo C); echo D
+echo A || (echo B; (echo C && echo D))
+echo A || ((echo B) && echo C) && echo D
+echo A || (echo B && echo C) && echo D
+(test src/main.cpp && echo 8_success) || echo 8_failed badly
+ls -a && ([ -d src])
+( (echo "line ") && echo 21 && ((echo " test") ) && ( ( echo succeeded) ) )
+(echo 12)
+((echo 13))
+( ((echo 14 ) ) )
+test -e tests/exit_test && echo "(path exists)"
+([ test Makefile] )
+(([ test Makefile] )
+([ -f Makefile ]  )
+[ -f Makefile ]  )
+ls -m && (ls -zz) || (echo "&&" && touch test.txt && test -f test.txt && rm test.txt)
+(echo &&) && (echo ||) || (echo ;)
+exit

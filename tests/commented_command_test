@@ -10,4 +10,12 @@ touch mockup.txt #this time with file name
 cat mockup.txt #cat tries
 history -q # testing with space after hash
 echo mkdir testDirectory # echo ERROR
+[ -d src] && test -d tests && echo line13 success
+test -e test/file/path # [ -d src/base.h ]
+[ -f src/main.cpp ] # test -e test/file/path
+[-f src/main.cpp] #no space with around brackets
+(test src/base.cpp) && echo "he#o world"
+echo "### world" && ([ -d src/base.h]) #test]
+echo "# " || (ls; (echo "##" && ls -a))
+test -f src#/main.cpp
 exit

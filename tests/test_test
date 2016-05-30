@@ -1,0 +1,18 @@
+test src/main.cpp
+test -e src/main.cpp
+test -f src/main.cpp
+test -d src/main.cpp
+[ -f src/base.h ]
+[-d src/base.cpp]
+[ src/main.h]
+(test src/main.cpp && echo 8_success) || echo 8_failed badly
+[src/base.h ]
+[ -d src ]
+test -d src
+test -d tests
+test -f ~/.vimrc
+([ test Makefile] )
+([ -f Makefile ]  )
+test -e tests/exit_test && echo "(path exists)"
+mkdir test && test -d test && rm -r test && line20 success
+exit
