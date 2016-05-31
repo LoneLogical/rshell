@@ -30,7 +30,7 @@ class Exit : public Command {
 };
 
 class Test : public Command {
-	private:
+	public:
 		Test(char** arr);
 		virtual bool execute();
 };

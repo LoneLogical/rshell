@@ -74,13 +74,13 @@ bool Test::execute() {
 	char flag;
 	int pathIndex = 1; // assumes path is the second index
 
-	if(!strcmp(args[0], "-e")) {
+	if(strcmp(args[0], "-e") == 0) {
 		flag = 'e';
 	}
-	else if(!strcmp(args[0], "-f")) {
+	else if(strcmp(args[0], "-f") == 0) {
 		flag = 'f';
 	}
-	else if(!strcmp(args[0], "-d")) {
+	else if(strcmp(args[0], "-d") == 0) {
 		flag = 'd';
 	}
 	else { // default: if no flag exists, it is -e
