@@ -29,6 +29,7 @@ To write a basic command shell, my partner and I used the composite pattern we l
 
 4) Quotation within quotations, or an uneven amount of quotations. This will result in the creation of incorrect commands and the destruction of the recursive function.
 
+5) While the semicolon connector may be surrounded by whitespace or pressed firmly against the previous command or closing parenthesis, the || and && connectors must be surrounded by a whitspace.
 
 
 #Authors
