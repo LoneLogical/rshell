@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -13,29 +14,41 @@ using namespace std;
 Base::Base() {}
 
 Command::Command(char** arr) {
-    //int size = arr.size();
-    //char* arr1[] = new char* array[size];
-    //for (unsigned int i = 0; i < size; ++i) {
-    //    arr1[i] = arr.at(i);
-    //}
     this->args = arr;
 }
-bool Command::execute() {
+bool Command::execute(int inputfd, int outputfd) {
     pid_t pid;
     bool temp = true;
-
     pid = fork();
-
     if(pid == -1) {
     	perror("fork");
     	temp = false;
     }
-
     else if (pid >= 0) {
         //fork succeeded
         if (pid == 0) {
             //child process
+            cout << "got to child process: " << args[0] << endl;
+            if (dup2(inputfd, STDIN_FILENO) == -1) {
+                cout << "foobar1: " << args[0] << endl;
+                perror("dup2");
+                temp = false;
+            }
+            /*
+            if (close(inputfd) == -1) {
+                cout << "foobar4" << endl;
+                perror("close");
+                temp false;
+            }
+            */
+            if (dup2(outputfd, STDOUT_FILENO) == -1) {
+                cout << "foobar2: " << args[0] << endl;
+                perror("dup2");
+                temp = false;
+            }
+            cout << "somehow got here1: " << args[0] << endl;
             if(execvp(args[0], args) == -1) {
+                cout << "foobar3" << endl;
                 perror("execvp");
                 temp = false;
                 exit(1);
@@ -44,6 +57,7 @@ bool Command::execute() {
         else {
             //parent process
             int status;
+            cout << "got to parent process: " << args[0] << endl;
             if(waitpid(pid, &status, 0) == -1) {
                 perror("wait");
             }
@@ -61,6 +75,9 @@ bool Command::execute() {
 bool Command::check_type() {  //checks base ptr to see if it's a connector
     return false;
 }
+char** Command::get_info() {
+    return this->args;
+}
 void Command::set_lhs(Base* left) {} //do nothing functions
 void Command::set_rhs(Base* right) {}
 
@@ -68,7 +85,7 @@ Test::Test(char** arr) : Command(arr) {
 	this->args = arr;
 }
 
-bool Test::execute() {
+bool Test::execute(int inputfd, int outputfd) {
 	struct stat sb;
 
 	char flag;
@@ -135,7 +152,7 @@ bool Test::execute() {
 }
 
 Exit::Exit(char** arr) : Command(arr) {}
-bool Exit::execute() {
+bool Exit::execute(int inputfd, int outputfd) {
    exit(0);
 } 
 
@@ -155,17 +172,19 @@ void Connector::set_rhs(Base* right) {
 bool Connector::check_type() { //checks base ptr to see if it's a connector
     return true;
 }
+char** Connector::get_info() {return NULL;} //do nothing function
+
 
 Semicolon::Semicolon() : Connector() {}
-bool Semicolon::execute() {
-    get_lhs()->execute();
-    return get_rhs()->execute();
+bool Semicolon::execute(int inputfd, int outputfd) {
+    get_lhs()->execute(inputfd, outputfd);
+    return get_rhs()->execute(inputfd, outputfd);
 }
 
 Ampersand::Ampersand() : Connector() {}
-bool Ampersand::execute() {
-    if (get_lhs()->execute() == true) {
-        return get_rhs()->execute();
+bool Ampersand::execute(int inputfd, int outputfd) {
+    if (get_lhs()->execute(inputfd, outputfd) == true) {
+        return get_rhs()->execute(inputfd, outputfd);
     }
     else {
         return false;
@@ -173,17 +192,94 @@ bool Ampersand::execute() {
 }
 
 Verticalbars::Verticalbars() : Connector() {}
-bool Verticalbars::execute() {
-     if (get_lhs()->execute() == true) {
+bool Verticalbars::execute(int inputfd, int outputfd) {
+    if (get_lhs()->execute(inputfd, outputfd) == true) {
         return true;
     }
     else {
-        return get_rhs()->execute();
+        return get_rhs()->execute(inputfd, outputfd);
     }
 }
+
+InputRedirect::InputRedirect() : Connector() {}
+bool InputRedirect::execute(int inputfd, int outputfd) {
+    char** temparr = get_rhs()->get_info();
+    
+    //might be in trouble if inputfd is needed here
+    int infd = open(temparr[0], O_RDONLY);
+    if (infd == -1) {
+        perror("open");
+        return false;
+    }
+    return get_lhs()->execute(infd, outputfd);
+}
+
+OutputRedirect::OutputRedirect() : Connector() {}
+bool OutputRedirect::execute(int inputfd, int outputfd) {
+    char** temparr = get_rhs()->get_info();
+
+    int outfd = open(temparr[0], O_WRONLY | O_TRUNC | O_CREAT,
+            S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+    if (outfd == -1) {
+        perror("open");
+        return false;
+    }
+    return get_lhs()->execute(inputfd, outfd); 
+}
+
+OutputAppend::OutputAppend() : Connector() {}
+bool OutputAppend::execute(int inputfd, int outputfd) {
+    char** temparr = get_rhs()->get_info();
+
+    int outfd = open(temparr[0], O_WRONLY | O_APPEND | O_CREAT,
+            S_IRUSR | S_IRGRP | S_IWGRP | S_IWUSR);
+    if (outfd == -1) {
+        perror("open");
+        return false;
+    }
+    return get_lhs()->execute(inputfd, outfd);
+}
    
+Pipe::Pipe() : Connector() {}
+bool Pipe::execute(int inputfd, int outputfd) {
+    int pipefd[2];
+    bool truth;
 
+    if (pipe(pipefd) == -1) {//perror and return false;
+        perror("pipe");
+        return false;
+    }    
+    cout << "pipefd[0] = " << pipefd[0] << endl; 
+    cout << "pipefd[1] = " << pipefd[1] << endl;
+    
+    if (close(pipefd[0]) == -1) {
+        perror("close");
+        return false;
+    }
 
-
-
-
+    cout << "after closing pipefd[0]: " << pipefd[0] << endl;
+    
+    cout << "first execution" << endl;
+    cout << "inputfd = " << inputfd << endl;
+    cout << "pipefd[1] = " << pipefd[1] << endl;
+    truth = get_lhs()->execute(inputfd, pipefd[1]);
+    if (truth == false) { 
+        return false;
+    }
+     
+    if (close(pipefd[1]) == -1) {
+        perror("close");
+        return false;
+    }
+    cout << "after closing pipefd[1]: " << pipefd[1] << endl;
+    
+    cout << "second execution" << endl;
+    cout << "pipefd[0] = " << pipefd[0] << endl;
+    cout << "outputfd = " << outputfd << endl;
+    truth = get_rhs()->execute(pipefd[0], outputfd);
+    if (truth == false) {
+       return false;
+    }
+    
+    return true;
+}

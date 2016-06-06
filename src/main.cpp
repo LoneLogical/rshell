@@ -6,6 +6,7 @@
 #include <unistd.h>
 using namespace std;
 
+void change_del(char* &, char);
 Base* make_command(char*); 
 Base* build_tree(vector<char>, unsigned int &, char* &);
 void command_line(string);
@@ -46,42 +47,89 @@ void command_line(string cmd) {
     strcpy(str2, altcmd.c_str());
     str2 = strtok(str2, "#");
 
-    char keys[] = "();&|\"";  
+    char keys[] = "><();&|\"";  
     vector<char> conns; // holds the delimiters in order in which they were found
     char* del;
-    int parenthcounter = 0;
-
+    int paircounter = 0;
+    cout << "str = " << str1 << endl;
     del = strpbrk (str1, keys); //finds first delimiter              
     while (del != NULL) // checks to make sure don't go out of bounds
     {
-        if ( (*del == '&') || (*del == '|') ) {
-            del = strpbrk(del+1, keys);
-        }
-        if ( (*del == '(') || (*del == ')') ) {
-            ++parenthcounter; //counts # of parenthesis 
-        }
-        conns.push_back(*del); //pushes last delimiter onto vector
-        del = strpbrk (del+1, keys); //finds next delimiter
-    }
+        char d = *del; 
+        char nextdel = *(del + 1);
+        cout << "d = " << d << endl;
+        cout << "nextdel = " << nextdel << endl;
+        cout << "del = " << del << endl;
+        cout << "*del = " << *del << endl;
+        
 
-    if ( parenthcounter % 2 != 0) { //if not paired up => results in an error
-        cout << "Error: Incorrect number of parenthesis." << endl;
+        if (d == '&') {
+            if (nextdel == '&')  { //only adds d if hits "&&"
+                cout << d << " was pushed on" << endl;
+                conns.push_back(d);
+                del = strpbrk(del+2, keys);
+            }
+            else {
+                del = strpbrk(del+1, keys);
+            }
+        }
+        else if (d == '|') {
+            if (nextdel == '|') { //only add d if hits "||"
+                cout << d << d << " was pushed on" << endl;
+                d = '!'; //filling in for double |
+                conns.push_back(d);
+                del = strpbrk(del+2, keys);
+            }
+            else {
+                cout << d << " was pushed on" << endl;
+                conns.push_back(d);
+                del = strpbrk(del+1, keys);
+            }
+        }
+        else if (d == '>') {
+            if (nextdel == '>') {
+                cout << d << d << " was pushed on" << endl;
+                d = '}'; //filling in for >>
+                conns.push_back(d);
+                del = strpbrk(del+2, keys);
+            }
+            else {
+                cout << d << " was pushed on" << endl;
+                conns.push_back(d);
+                del = strpbrk(del+1, keys);
+            }
+        }
+        else {
+            conns.push_back(d);
+            cout << d << "  was pushed on" << endl;
+            if ( (d == '(') || (d == ')') || (d == '\"') ) {
+                cout << d << " changed paircounter" << endl;
+                ++paircounter; //counts # of parenthesis 
+            }
+            del = strpbrk(del+1, keys); // find nexts delimiter
+        }
+    }
+    cout << "paircounter = " << paircounter << endl;
+    if ( paircounter % 2 != 0) { //if not paired up => results in an error
+        cout << "Error: Incorrect number of parenthesis or quotations." << endl;
         return;
     }
 
     //ouput tester
-    /* 
+     
     cout << "conns size: " << conns.size() << endl;
     for (unsigned int i = 0; i < conns.size(); ++i)
     {
         cout << conns.at(i) << ' '; //prints delimiters found
     }
     cout << endl;
-    */
+    
      
     unsigned int con_index = 0;
     Base* user = build_tree(conns, con_index, str2); // call function for first time
-    user->execute();
+    cout << "finished building tree" << endl;
+    user->execute(0, 1);
+    cout << "finished executing" << endl;
 
     return;
 }
@@ -94,21 +142,23 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
     Base* child = NULL;
     char* token = NULL;
     char d;
-    char* del = new char[2];
+    char* del = new char[3];
     // use strtok_r because the inner while loop uses 
     // strtok also, so it messes up outer while loop's 
     // strtok pointers, thus we use strtok_r on outer
 
     if ( (connects.size() > 0) && (con_index < connects.size()) ) {
         d = connects.at(con_index);
-        del[0] = d;
-        del[1] = '\0';
+        change_del(del, d);
+        cout << "d = " << d << endl;
+        cout << "del = " << del << endl;  
     }
     
     else {
         d = ')';
-        del[0] = d;
-        del[1] = '\0';
+        change_del(del, d);
+        cout << "d = " << d << endl;
+        cout << "del = " << del << endl;
     }
     //cout << "d = " << d << endl;
     // takes in the first delimiter in command line
@@ -142,8 +192,9 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
 
             if ( con_index < connects.size() ) {
                 d = connects.at(con_index);
-                del[0] = d;
-                del[1] = '\0';
+                change_del(del, d);
+                cout << "d = " << d << endl;
+                cout << "del = " << del << endl;
 
                 //these behave differently because of strtok_r
                 c = cmdstr[0];
@@ -187,8 +238,9 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
                 child = make_command(token);
 
                 d = connects.at(con_index);
-                del[0] = d;
-                del[1] = '\0';
+                change_del(del, d);
+                cout << "d = " << d << endl;
+                cout << "del = " << del << endl;
                 
                 char f = cmdstr[0];
                 if ( (f == ';') || (f == ')') ) { //this may break
@@ -210,17 +262,17 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
         string deltemp(del);
         if (deltemp == ";") {
             curr = new Semicolon();
-            //cout << "made semi" << endl;
+            cout << "made semi" << endl;
         }
-        else if (deltemp == "&") {
+        else if (deltemp == "&&") {
             curr = new Ampersand();
-            //cout << "made amper" << endl;
+            cout << "made amper" << endl;
             cmdstr = cmdstr + 1;
             //cout << "cmdstr = " << cmdstr << endl;
         }
-        else if (deltemp == "|") {
+        else if (deltemp == "||") {
             curr = new Verticalbars();
-            //cout << "made verticalbars" << endl;
+            cout << "made verticalbars" << endl;
             cmdstr = cmdstr + 1;
             //cout << "cmdstr = " << cmdstr << endl;
         }
@@ -234,6 +286,24 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
                 return prev;
             }
         }
+        else if (deltemp == "<") {
+            curr = new InputRedirect();
+            cout << "made inputredirect" << endl;
+        }
+        else if (deltemp == ">") {
+            curr = new OutputRedirect();
+            cout << "made outputredirect" << endl;
+        }
+        else if (deltemp == "|") {
+            curr = new Pipe();
+            cout << "made pipe" << endl;
+        }
+        else if (deltemp == ">>") {
+            curr = new OutputAppend();
+            cout << "made outputappend" << endl;
+            cmdstr = cmdstr + 1;
+        }
+
         else {
             cout << "something went wrong: choosing connector" << endl;
         }
@@ -261,13 +331,15 @@ Base* build_tree(vector<char> connects, unsigned int &con_index, char* &cmdstr) 
         //cout << "con_index = " << con_index << endl;
         if (con_index < connects.size()) {
             d = connects.at(con_index);
-            del[0] = d;
-            del[1] = '\0';
+            change_del(del, d);
+            cout << "d = " << d << endl;
+            cout << "del = " << del << endl;
         }
         else {
             d = ')';
-            del[0] = d;
-            del[1] = '\0';
+            change_del(del, d);
+            cout << "d = " << d << endl;
+            cout << "del = " << del << endl;
         }
             
 
@@ -285,15 +357,15 @@ Base* make_command(char* token) {
 
     if (token != NULL) {
 
-        //cout << "Token: " << token << endl;
+        cout << "Token: " << token << endl;
         small = strtok(token, " ");
         while (small != NULL)
         {
-            //cout << '_' << small << '_'; 
+            cout << '_' << small << '_'; 
             args.push_back(small);
             small = strtok(NULL, " ");
         }
-        //cout << endl;
+        cout << endl;
 
         // for loop to convert vector<char*> into char* array[]
         // then create a command object by passing in array
@@ -348,8 +420,36 @@ Base* make_command(char* token) {
     }
 }
 
-
-
+void change_del(char* &del, char d) {
+    if (d == '!') {
+        d = '|';
+        del[0] = d;
+        del[1] = d;
+        del[2] = '\0';
+    }
+    else if (d == '}') {
+        d = '>';
+        del[0] = d;
+        del[1] = d;
+        del[2] = '\0';
+    }
+    else if (d == '&') {
+        del[0] = d;
+        del[1] = d;
+        del[2] = '\0';
+    }
+    else if ( (d == '<') || (d == '>') || (d == '|') || (d == '\"') || (d == ';') 
+            || (d == '(') || (d == ')') ) {
+        del[0] = d;
+        del[1] = '\0';
+        del[2] = '\0';
+    }
+    else {
+        cout << "Error: no matching delimiter." << endl;
+    }
+    
+    return;
+}
 
 
 
