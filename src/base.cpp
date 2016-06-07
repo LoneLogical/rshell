@@ -46,7 +46,6 @@ bool Command::execute(int inputfd, int outputfd) {
                 perror("dup2");
                 temp = false;
             }
-            cout << "somehow got here1: " << args[0] << endl;
             if(execvp(args[0], args) == -1) {
                 cout << "foobar3" << endl;
                 perror("execvp");
@@ -251,11 +250,7 @@ bool Pipe::execute(int inputfd, int outputfd) {
     }    
     cout << "pipefd[0] = " << pipefd[0] << endl; 
     cout << "pipefd[1] = " << pipefd[1] << endl;
-    
-    if (close(pipefd[0]) == -1) {
-        perror("close");
-        return false;
-    }
+        
 
     cout << "after closing pipefd[0]: " << pipefd[0] << endl;
     
@@ -277,6 +272,12 @@ bool Pipe::execute(int inputfd, int outputfd) {
     cout << "pipefd[0] = " << pipefd[0] << endl;
     cout << "outputfd = " << outputfd << endl;
     truth = get_rhs()->execute(pipefd[0], outputfd);
+
+    if (close(pipefd[0]) == -1) {
+        perror("close");
+        return false;
+    }
+
     if (truth == false) {
        return false;
     }
