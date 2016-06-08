@@ -1,2 +1,18 @@
-
+ls -l > ls-l.txt #creation through output redirect
+echo "adding to ls-l.txt" >> ls-l.txt
+ls -a > ls-a.txt
+echo "replacing contents of ls-a.txt" > ls-a.txt
+test src > test_cmd.txt && test -f src >> test_cmd.txt
+((test src/main.cpp && echo line_6_success) || echo line_6_failure) > line6.txt
+tests -e tests/exit_test && echo "(path exists)" > line7.txt
+(echo &&) && (echo ||) || (echo ;) > line8.txt
+ls -m && (ls -zz) || (echo "&&" && touch test.txt && test -f test.txt && rm test.txt) > line9.txt
+mkdir test && test -d test && rm -r test && line10 success >> test_cmd10.txt
+[ src/base.h ] >> test_cmd.txt
+([ src/base.txt ] ) >> test_cmd.txt
+(([ src/main.cpp ] ) >> test_cmd.txt
+[ test -e src ] >> test_cmd.txt
+( (( history)   ) )    ) > line 15.txt
+echo "contents of cat1.txt" > cat1.txt && (touch cat2.txt)
+(cat cat1.txt > cat2.txt) && (echo "contents of cat2.txt" >> cat2.txt)
 exit

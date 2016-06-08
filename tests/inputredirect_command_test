@@ -1,2 +1,7 @@
-
+echo "contents of input_test.txt" > input_test.txt
+(echo "line2" && echo line3 && echo line4 && echo line5) > input_test.txt
+cat < input_test.txt
+(echo "lineX" && echo "lineY" && echo lineZ) > input_test1.txt
+(echo lineA && echo lineB && echo lineC) > input_test2.txt
+cat input_test1.txt input_test2.txt >> input_test.txt && cat < input_test.txt > input_test4.txt
 exit

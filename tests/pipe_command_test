@@ -1,2 +1,13 @@
-
+echo contents of piping.txt > piping.txt
+cat piping.txt | less
+ls -al | more
+ls | head -3
+(ls | head -3) >> piping.txt
+ls | head -3 | tail -1 >> piping.txt
+ls -l | tail -n +2 | sort
+cat < piping.txt | tr A­Z a­z | tee pipingOutputFile1 | tr a­z A­Z > pipingOutputFile2
+(echo 1 && echo 12 && echo 7 && echo 17 && echo 0) > piping_sort1.txt && echo 21 > piping_sort2.txt
+cat piping_sort1* | sort > piping_sort3.txt
+ls -l | grep "Jun" > piping_filters
+cat piping* | pr > piping_all #gathering all in one file
 exit
