@@ -1,5 +1,5 @@
 # rshell
-CS100 Assignment 3
+CS100 Assignment 4
 
 #Instructions
 1) git clone https://github.com/LoneLogical/rshell.git
