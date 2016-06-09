@@ -28,26 +28,19 @@ bool Command::execute(int inputfd, int outputfd) {
         //fork succeeded
         if (pid == 0) {
             //child process
-            cout << "got to child process: " << args[0] << endl;
+            //1st dup2 call changes input value of command
+            //2nd dup2 call changes output value of command
+            //if inputfd == 0 or outputfd == 1, nothing gets changed for that call
             if (dup2(inputfd, STDIN_FILENO) == -1) {
-                cout << "foobar1: " << args[0] << endl;
                 perror("dup2");
                 temp = false;
             }
-            /*
-            if (close(inputfd) == -1) {
-                cout << "foobar4" << endl;
-                perror("close");
-                temp false;
-            }
-            */
             if (dup2(outputfd, STDOUT_FILENO) == -1) {
-                cout << "foobar2: " << args[0] << endl;
                 perror("dup2");
                 temp = false;
             }
+
             if(execvp(args[0], args) == -1) {
-                cout << "foobar3" << endl;
                 perror("execvp");
                 temp = false;
                 exit(1);
@@ -56,7 +49,6 @@ bool Command::execute(int inputfd, int outputfd) {
         else {
             //parent process
             int status;
-            cout << "got to parent process: " << args[0] << endl;
             if(waitpid(pid, &status, 0) == -1) {
                 perror("wait");
             }
@@ -86,7 +78,6 @@ Test::Test(char** arr) : Command(arr) {
 
 bool Test::execute(int inputfd, int outputfd) {
 	struct stat sb;
-
 	char flag;
 	int pathIndex = 1; // assumes path is the second index
 
@@ -105,6 +96,11 @@ bool Test::execute(int inputfd, int outputfd) {
 	}
 
 	bool fdExists = (stat(args[pathIndex], &sb) == 0);
+
+    if (dup2(outputfd, STDOUT_FILENO) == -1) {
+        perror("dup2");
+        return false;
+    }
 
 	if(flag == 'f') {
 		if(!fdExists) {
@@ -168,9 +164,6 @@ void Connector::set_lhs(Base* left) {
 void Connector::set_rhs(Base* right) {
     this->rhs = right;
 }
-bool Connector::check_type() { //checks base ptr to see if it's a connector
-    return true;
-}
 char** Connector::get_info() {return NULL;} //do nothing function
 
 
@@ -178,6 +171,9 @@ Semicolon::Semicolon() : Connector() {}
 bool Semicolon::execute(int inputfd, int outputfd) {
     get_lhs()->execute(inputfd, outputfd);
     return get_rhs()->execute(inputfd, outputfd);
+}
+bool Semicolon::check_type() {
+    return true;
 }
 
 Ampersand::Ampersand() : Connector() {}
@@ -189,6 +185,9 @@ bool Ampersand::execute(int inputfd, int outputfd) {
         return false;
     }
 }
+bool Ampersand::check_type() {
+    return true;
+}
 
 Verticalbars::Verticalbars() : Connector() {}
 bool Verticalbars::execute(int inputfd, int outputfd) {
@@ -199,12 +198,16 @@ bool Verticalbars::execute(int inputfd, int outputfd) {
         return get_rhs()->execute(inputfd, outputfd);
     }
 }
+bool Verticalbars::check_type() {
+    return true;
+}
 
 InputRedirect::InputRedirect() : Connector() {}
 bool InputRedirect::execute(int inputfd, int outputfd) {
+    //rhs should be a textfile, so we can't call execvp on it
+    //instead, we just grab the file name and call open here
     char** temparr = get_rhs()->get_info();
     
-    //might be in trouble if inputfd is needed here
     int infd = open(temparr[0], O_RDONLY);
     if (infd == -1) {
         perror("open");
@@ -212,9 +215,14 @@ bool InputRedirect::execute(int inputfd, int outputfd) {
     }
     return get_lhs()->execute(infd, outputfd);
 }
+bool InputRedirect::check_type() {
+    return false;
+}
 
 OutputRedirect::OutputRedirect() : Connector() {}
 bool OutputRedirect::execute(int inputfd, int outputfd) {
+    //rhs should be a textfile, so we can't call execvp on it
+    //instead, we just grab the file name and call open here
     char** temparr = get_rhs()->get_info();
 
     int outfd = open(temparr[0], O_WRONLY | O_TRUNC | O_CREAT,
@@ -225,9 +233,14 @@ bool OutputRedirect::execute(int inputfd, int outputfd) {
     }
     return get_lhs()->execute(inputfd, outfd); 
 }
+bool OutputRedirect::check_type() {
+    return false;
+}
 
 OutputAppend::OutputAppend() : Connector() {}
 bool OutputAppend::execute(int inputfd, int outputfd) {
+    //rhs should be a textfile, so we can't call execvp on it
+    //instead, we just grab the file name and call open here
     char** temparr = get_rhs()->get_info();
 
     int outfd = open(temparr[0], O_WRONLY | O_APPEND | O_CREAT,
@@ -238,25 +251,21 @@ bool OutputAppend::execute(int inputfd, int outputfd) {
     }
     return get_lhs()->execute(inputfd, outfd);
 }
+bool OutputAppend::check_type() {
+    return false;
+}
    
 Pipe::Pipe() : Connector() {}
 bool Pipe::execute(int inputfd, int outputfd) {
     int pipefd[2];
     bool truth;
 
+    //pipe the array to allocate the file descriptors
     if (pipe(pipefd) == -1) {//perror and return false;
         perror("pipe");
         return false;
     }    
-    cout << "pipefd[0] = " << pipefd[0] << endl; 
-    cout << "pipefd[1] = " << pipefd[1] << endl;
-        
-
-    cout << "after closing pipefd[0]: " << pipefd[0] << endl;
-    
-    cout << "first execution" << endl;
-    cout << "inputfd = " << inputfd << endl;
-    cout << "pipefd[1] = " << pipefd[1] << endl;
+    //have left hand side's execute output to write end of pipe 
     truth = get_lhs()->execute(inputfd, pipefd[1]);
     if (truth == false) { 
         return false;
@@ -266,11 +275,7 @@ bool Pipe::execute(int inputfd, int outputfd) {
         perror("close");
         return false;
     }
-    cout << "after closing pipefd[1]: " << pipefd[1] << endl;
     
-    cout << "second execution" << endl;
-    cout << "pipefd[0] = " << pipefd[0] << endl;
-    cout << "outputfd = " << outputfd << endl;
     truth = get_rhs()->execute(pipefd[0], outputfd);
 
     if (close(pipefd[0]) == -1) {
@@ -284,3 +289,9 @@ bool Pipe::execute(int inputfd, int outputfd) {
     
     return true;
 }
+bool Pipe::check_type() {
+    return false;
+}
+
+
+

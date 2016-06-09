@@ -47,7 +47,7 @@ class Connector : public Base {
         virtual Base* get_rhs(); 
         virtual void set_lhs(Base*); 
         virtual void set_rhs(Base*); 
-        virtual bool check_type();
+        virtual bool check_type() = 0;
         virtual char** get_info();
         virtual bool execute(int, int) = 0;
 };
@@ -56,42 +56,49 @@ class Semicolon : public Connector {
     public:
         Semicolon();
         virtual bool execute(int, int);
+        virtual bool check_type();
 };
 
 class Ampersand : public Connector {
     public:
         Ampersand();
         virtual bool execute(int, int);
+        virtual bool check_type();
 };
 
 class Verticalbars : public Connector {
     public:
         Verticalbars();
         virtual bool execute(int, int);
+        virtual bool check_type();
 };
 
 class InputRedirect : public Connector {
     public:
         InputRedirect();
         virtual bool execute(int, int);
+        virtual bool check_type();
 };
 
 class OutputRedirect : public Connector {
     public:
         OutputRedirect();
         virtual bool execute(int, int); 
+        virtual bool check_type();
 };
 
 class OutputAppend : public Connector {
     public:
         OutputAppend();
         virtual bool execute(int, int);
+        virtual bool check_type();
 };
 
 class Pipe : public Connector {
     public:
         Pipe();
         virtual bool execute(int, int);
+        virtual bool check_type();
 };
 
 #endif
