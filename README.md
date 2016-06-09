@@ -31,6 +31,8 @@ To write a basic command shell, my partner and I used the composite pattern we l
 
 5) While the semicolon connector may be surrounded by whitespace or pressed firmly against the previous command or closing parenthesis, the || and && connectors must be surrounded by a whitspace.
 
+6) The test function was unable to accept the dup2 changes. So the test command only uses standard output. If combined with pipes or input output redirection, no input is received by these structures.
+
 #Authors
 Destin Raymundo: [https://github.com/draym001]
 
