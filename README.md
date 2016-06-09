@@ -21,6 +21,15 @@ To write a basic command shell, my partner and I used the composite pattern we l
 2) The Input Redirect, Output Redirect, Output Append, and Pipe classes have been built. These classes inherit from our Connector class. These classes allow the user to input the connectors, (<, >, >>, |) into the command line.
 
 #Bugs
+1) There are some definite memory issues that need reworking. Possible memory leaks occur when dynamically creating new Command and Connector objects for building the structure. Each time the user enters a command, we're not totally certain that the memory devoted to the previous command line is given back to the heap properly.
+
+2) The parsing part of the program does not restrict users from entering connectors without commands. For example, "echo hello; " would throw an error. Likewise, if commands are commented out, a similar error arises, such as in "echo hello && # ls -a". This is basically the same case because we've treated the text after '#' to be whitespace.
+
+3) An uneven amount of parenthesis will destroy the recursive structure of the program, so if an uneven amount of parenthesis are entered by the user, the program won't even bother starting the build structure process. Instead, it will output an error warning and let the user attempt the command again.
+
+4) Quotation within quotations, or an uneven amount of quotations. This will result in the creation of incorrect commands and the destruction of the recursive function.
+
+5) While the semicolon connector may be surrounded by whitespace or pressed firmly against the previous command or closing parenthesis, the || and && connectors must be surrounded by a whitspace.
 
 #Authors
 Destin Raymundo: [https://github.com/draym001]
